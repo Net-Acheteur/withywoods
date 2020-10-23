@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Withywoods.AspNetCore.DependencyInjection
 {
@@ -15,6 +16,7 @@ namespace Withywoods.AspNetCore.DependencyInjection
         /// Add Swagger generation in ASP.NET Core dependency injection mechanism.
         /// </summary>
         /// <param name="services"></param>
+        /// <param name="configuration"></param>
         /// <returns></returns>
         public static IServiceCollection AddSwaggerGen(this IServiceCollection services, IWebAppConfiguration configuration)
         {
@@ -30,6 +32,33 @@ namespace Withywoods.AspNetCore.DependencyInjection
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
                 c.CustomSchemaIds(GetClassNameWithoutDtoSuffix);
+            });
+
+            return services;
+        }
+
+        /// <summary>
+        /// Add Swagger generation in ASP.NET Core dependency injection mechanism, with configuration handler.
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="configuration"></param>
+        /// <param name="configureSwagger"></param>
+        /// <returns></returns>
+        public static IServiceCollection AddSwaggerGenAndConfigureOptions(this IServiceCollection services, IWebAppConfiguration configuration, Func<SwaggerGenOptions, bool> configureSwagger = null)
+        {
+            var swaggerDefinition = configuration.SwaggerDefinition;
+
+            services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc(swaggerDefinition.Version, swaggerDefinition);
+
+                // idea: manage Bearer authentication
+
+                var xmlFile = $"{configuration.AssemblyName}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+                c.CustomSchemaIds(GetClassNameWithoutDtoSuffix);
+                configureSwagger?.Invoke(c);
             });
 
             return services;
