@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
-using Moq;
-using Swashbuckle.AspNetCore.SwaggerGen;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Withywoods.AspNetCore.DependencyInjection;
 using Withywoods.AspNetCore.UnitTests.Fakes;
 using Xunit;
