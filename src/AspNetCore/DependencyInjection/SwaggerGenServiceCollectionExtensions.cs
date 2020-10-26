@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Withywoods.AspNetCore.DependencyInjection
@@ -38,27 +39,24 @@ namespace Withywoods.AspNetCore.DependencyInjection
         }
 
         /// <summary>
-        /// Add Swagger generation in ASP.NET Core dependency injection mechanism, with configuration handler.
+        /// Add Swagger generation in ASP.NET Core dependency injection mechanism, with Basic Authentication mechanism.
         /// </summary>
         /// <param name="services"></param>
         /// <param name="configuration"></param>
-        /// <param name="configureSwagger"></param>
         /// <returns></returns>
-        public static IServiceCollection AddSwaggerGenAndConfigureOptions(this IServiceCollection services, IWebAppConfiguration configuration, Func<SwaggerGenOptions, bool> configureSwagger = null)
+        public static IServiceCollection AddSwaggerGenWithBasicAuthSecurity(this IServiceCollection services, IWebAppConfiguration configuration)
         {
             var swaggerDefinition = configuration.SwaggerDefinition;
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc(swaggerDefinition.Version, swaggerDefinition);
-
-                // idea: manage Bearer authentication
-
                 var xmlFile = $"{configuration.AssemblyName}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+                c.SwaggerDoc(swaggerDefinition.Version, swaggerDefinition);
                 c.IncludeXmlComments(xmlPath);
                 c.CustomSchemaIds(GetClassNameWithoutDtoSuffix);
-                configureSwagger?.Invoke(c);
+                c.AddSecurityDefinition("BasicAuthentication", new OpenApiSecurityScheme() { Scheme = "Basic", In=ParameterLocation.Header, Name= "Authorization", Type=SecuritySchemeType.Http });
             });
 
             return services;
